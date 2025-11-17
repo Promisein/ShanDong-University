@@ -1,0 +1,526 @@
+create table test1_student
+(
+sid char(12) not null,
+name varchar(10) not null,
+sex char(2),
+age int,
+birthday date,
+dname varchar(30),
+class varchar(10)
+);
+
+create table test1_course
+(
+cid char(6) not null,
+name varchar(40) not null,
+fcid char(6),
+credit numeric(4,1)
+);
+
+create table test1_student_course
+(
+sid char(12) not null,
+cid char(6) not null,
+score numeric(5,1),
+tid char(6),
+sctime date
+);
+insert into test1_student values('201800020101','王欣','女','21',date'1994-02-02','计算机学院','2010')
+insert into test1_student values('201800020102','李华','女','20',date'1995-03-03','软件学院','2009')
+insert into test1_course values('800001','数据结构',null,'2')
+insert into test1_course values('800002','数据库','800001','2.5')
+insert into test1_student_course values('201800020101','300001','91.5','200101',to_date('2009-07-15 09-09-09','yyyy-mm-dd hh24-mi-ss'))
+insert into test1_student_course values('201800020101','300002','92.6','200102',to_date('2009-07-15 10-10-10','yyyy-mm-dd hh24-mi-ss'))
+
+Create or replace view test2_01 as select sid,name from pub.student where sid not in (select sid from pub.student_course)
+
+Create or replace view test2_02 as select sid,name from pub.student where sid in (select sid from pub.student_course where cid in (select cid from pub.student_course where sid=200900130417 )) minus
+(select sid,name
+from pub.student
+where sid=200900130417)
+
+create or replace view test2_03 as select sid,name from pub.student where sid in (select sid from pub.student_course where cid in (select cid from pub.course where fcid= '300002'))
+
+create or replace view test2_04 as select sid,name from pub.student  natural join pub.student_course where cid in (select cid from pub.course where name='数据结构')
+intersect (select sid,name from pub.student  natural join pub.student_course where cid in (select cid from pub.course where name='操作系统'))
+minus (select sid,name from pub.student  natural join pub.student_course where cid in (select cid from pub.course where name='程序设计语言'))
+
+create or replace view test2_05 as select sid,name,round(avg(score),0)avg_score,sum(score)sum_score from pub.student natural join pub.student_course where age='20'
+group by sid,name
+
+create view test2_06 as
+	select t1.cid, name, max_score, max_score_count
+	from 
+	(
+		select cid, name
+		from pub.course
+		group by cid, name
+	) t1,
+	(
+		select cid, max(score) max_score
+		from pub.student_course
+		group by cid
+	) t2,
+	(
+		select t3.cid, count(distinct sid) max_score_count
+		from pub.student_course t3,
+		(
+			select cid, max(score) max_score
+			from pub.student_course
+			group by cid
+		) t4
+		where t3.cid = t4.cid
+		and t3.score = t4.max_score
+		group by t3.cid
+	) t5
+	where t1.cid = t2.cid
+	and t2.cid = t5.cid
+
+create or replace view test2_07 as select sid,name from pub.student where name not in (select name from pub.student where name like '李%'  or name like '张%'or name like '王%' )
+
+create or replace view test2_08 as select substr(name,1,1) second_name,count(*) p_count from pub.student group by substr(name,1,1)
+
+create or replace view test2_09 as select sid,name,score from pub.student natural join pub.student_course where cid='300003' 
+
+create or replace view test2_10 as select sid,name from (select sid,cid,count(score)time from pub.student_course where score<60 group by sid,cid)natural join pub.student
+where time>=2
+
+create table test3_01 as select  *  from pub.student_31 where regexp_like(sid,'^[[:digit:]]{12}$')
+
+create table test3_02 as select*from pub.student_31 where 2012-extract(year from birthday)=age
+
+create table test3_03 as
+select * from pub.student_31
+where sex='男' or sex='女' or sex is null
+
+create table test3_04 as select *from pub.student_31 where dname is not null
+and dname not like '% %' 
+and length(dname)>=3
+
+create table test3_05 as select *from pub.student_31 where length(class)=4
+
+create table test3_06 as select * from pub.student_31
+delete from test3_06 where not regexp_like(sid,'^[[:digit:]]{12}$')
+delete from test3_06 where age != 2012 - extract(year from birthday)
+delete from test3_06 where length(name)<2 or name like '% %'
+delete from test3_06  where sex != '男' and sex != '女' and sex is not null;
+delete from test3_06 where dname is null or dname like '% %';
+delete from test3_06 where length(dname)<3 ;
+delete from test3_06  where class like '% %' or class  like '%级%';
+
+create table test3_07 as select *from pub.student_course_32 where  sid in (select sid from pub.student)
+
+create table test3_08 as select * from pub.student_course_32
+delete from test3_08 where (cid,tid) not in (select test3_08.cid,test3_08.tid from test3_08,pub.teacher_course where test3_08.cid=pub.teacher_course.cid and 
+test3_08.tid=pub.teacher_course.tid)
+
+create table test3_09 as select *from pub.student_course_32 where score>0 and score <=100
+
+create table test3_10 as select  *  from pub.student_course_32;
+delete from test3_10 where score>100 or score <0
+delete from test3_10 where cid not in (select cid from pub.course)
+delete from test3_10 where sid not in (select sid from pub.student)
+delete from test3_10 where tid not in (select tid from pub.teacher)
+delete from test3_10 where (tid,cid) not in ( select tid,cid from pub.teacher_course )
+
+create table test4_01 as select  *  from pub.student_41
+alter table test4_01 add sum_score int
+update test4_01 set sum_score=(select sum(score) from pub.student_course S where S.sid=test4_01.sid)
+
+create table test4_02 as select  *  from pub.student_41
+alter table test4_02 add avg_score numeric(8,1)             //numeric（n，m） n是精度，m是保留的小数位数
+update test4_02 set avg_score=(select avg(score) from pub.student_course S where S.sid=test4_02.sid)
+
+create table test403 as (select sid,cid,max(score)score from pub.student_course group by sid,cid)
+update test4_03 set sum_credit=( select sum(credit) from test403 natural join pub.course where score>=60 and test403.sid = test4_03.sid)
+
+update test4_04 set dname = (select did from pub.department D where D.dname = test4_04.dname) where test4_04.dname in (select dname from pub.department)
+
+
+update test4_05
+set did=(select did
+                        from pub.DEPARTMENT
+                        where pub.DEPARTMENT.DNAME=test4_05.dname)
+where dname in(select dname from pub.DEPARTMENT)
+
+update test4_05
+set did=(select did
+                        from pub.DEPARTMENT_41 
+                        where pub.DEPARTMENT_41.DNAME=test4_05.dname)
+where dname in(select dname from pub.DEPARTMENT_41）
+
+update test4_05
+set did='00' 
+where did is null
+
+
+create table test4_06 as select  * from pub.student_42
+update test4_06 set name=replace(name,' ','')
+
+create table test4_07 as(
+select *
+from pub.student_42)；
+select sex,count(*) from test4_07 group by sex
+update test4_07
+set sex=replace(sex,' ','');
+update test4_07
+set sex=replace(sex,'性','');
+
+create table test4_08 as select  *  from pub.student_42
+update test4_08 set class=replace(class,' ','')
+update test4_08 set class=replace(class,'级','')
+
+create table test4_09 as(
+select *
+from pub.student_42);
+update test4_09
+set age=2012-extract(year from birthday);
+
+create table test4_10 as select  *  from pub.student_42
+update test4_10 set name=replace(name,' ','')
+update test4_10 set sex=replace(sex,'性','')
+update test4_10 set sex=replace(sex,' ','')
+update test4_10 set age=2012 - extract(year from birthday)
+update test4_10 set class=replace(class,'级','')
+update test4_10 set class=replace(class,' ','')
+update test4_10 set dname=replace(dname,' ','')
+
+ create table test5_01(First_name varchar(4),frequency numeric(4))
+insert into test5_01(first_name,frequency) select substr(name,2),count(*) from pub.student group by substr(name,2)
+
+create table test5_02(letter varchar(2),frequency numeric(4))
+insert into test5_02(letter,frequency)
+select myname,count(*)
+from((select substr(name,2,1)myname 
+from pub.student
+)union all(select substr(name,3,1)myname 
+from pub.student))
+where myname is not null
+ group by myname
+
+create table test5_03
+(
+dname varchar(30),
+class varchar(30),
+P_count1 int default 0 not null,
+P_count2 int default 0 not null,
+P_count int default 0 not null
+)
+insert into test5_03(dname,class,p_count)
+select dname,class,count(sid)
+from pub.student
+where dname is not null
+group by dname,class
+update test5_03 t set p_count1 = 
+(select count(sid)
+from (
+	select S.sid,S.dname,S.class
+	from pub.student S,pub.course C,pub.student_course SC
+	where S.sid = SC.sid and C.cid=SC.cid and SC.score >= 60
+	group by S.sid,S.dname,S.class
+	having sum(C.credit) >= 10
+) temp
+where t.dname = temp.dname and t.class  = temp.class)
+update test5_03 t set p_count2 = 
+(
+	select count(sid)
+	from 
+	(
+		select S.sid,S.dname,S.class
+		from pub.student S,pub.course C,pub.student_course SC
+		where S.sid = SC.sid and C.cid=SC.cid and SC.score >= 60
+		group by S.sid,S.dname,S.class
+		having sum(C.credit) < 10 union 
+		(
+			select sid,dname,class 
+			from pub.student 
+			where sid 
+			not in
+			(
+				select sid 
+				from pub.student_course
+			)
+	)
+) temp
+where t.dname = temp.dname and t.class  = temp.class)
+
+create table test5_04
+(
+dname varchar2(30),
+class varchar2(10),
+p_count1 int,
+p_count2 int,
+p_count int
+);
+insert into test5_04(dname,class,p_count)
+select dname,class,count(sid)
+from pub.student
+where dname is not null
+group by dname,class
+update test5_04 t set p_count1 = 
+(select count(sid)
+from 
+(
+	(select S.sid,S.dname,S.class
+	from pub.student S,pub.course C,pub.student_course SC
+	where S.sid = SC.sid and C.cid=SC.cid and SC.score >= 60 and S.class > 2008
+	group by S.sid,S.dname,S.class
+	having sum(C.credit) >= 10) 
+	union
+    (select S.sid,S.dname,S.class
+	from pub.student S,pub.course C,pub.student_course SC
+	where S.sid = SC.sid and C.cid=SC.cid and SC.score >= 60 and S.class <= 2008
+	group by S.sid,S.dname,S.class
+	having sum(C.credit) >= 8)
+) temp
+where t.dname = temp.dname and t.class  = temp.class)
+update test5_04 t set p_count2 = 
+(
+	select count(sid)
+	from 
+	(
+		(select S.sid,S.dname,S.class
+		from pub.student S,pub.course C,pub.student_course SC
+		where S.sid = SC.sid and C.cid=SC.cid and SC.score >= 60 and S.class > 2008
+		group by S.sid,S.dname,S.class
+		having sum(C.credit) < 10) 
+		union 
+        (select S.sid,S.dname,S.class
+		from pub.student S,pub.course C,pub.student_course SC
+		where S.sid = SC.sid and C.cid=SC.cid and SC.score >= 60 and S.class <= 2008
+		group by S.sid,S.dname,S.class
+		having sum(C.credit) < 8) 
+		union
+		(
+			select sid,dname,class 
+			from pub.student 
+			where sid 
+			not in
+			(
+				select sid 
+				from pub.student_course
+			)
+		)
+) temp
+where t.dname = temp.dname and t.class  = temp.class)
+
+create view test5_05 as
+select*
+from(
+ select A.dname,round(avg(maxScore))avg_ds_score
+ from(select sid,cid,max(score)maxScore
+          from pub.student_course
+          group by sid,cid)C ,pub.student A,pub.course B
+ where C.sid=A.sid and C.cid=B.cid and B.name='数据结构'  and A.dname is not null
+ group by A.dname)
+natural full outer join(
+select A.dname,round(avg(maxScore))avg_os_score
+ from(select sid,cid,max(score)maxScore
+          from pub.student_course
+          group by sid,cid)C ,pub.student A,pub.course B
+ where C.sid=A.sid and C.cid=B.cid and B.name='操作系统'  and A.dname is not null
+ group by A.dname)
+
+
+create or replace view test5_06 as
+select *
+from
+(select A.sid,A.name,A.dname,maxScore ds_score
+from (select sid,cid,max(score) maxScore 
+        from pub.student_course
+	group by sid,cid) C,pub.student A,pub.course B
+where A.sid = C.sid and C.cid = B.cid and A.dname = '计算机科学与技术学院' and B.name = '数据结构')
+natural join
+(select A.sid,A.name,A.dname,maxScore os_score
+from pub.student A,pub.course B,
+	(select sid,cid,max(score) maxScore 
+	from pub.student_course
+	group by sid,cid
+	)C
+where A.sid = C.sid and C.cid =B.cid and A.dname = '计算机科学与技术学院' and B.name = '操作系统')
+
+create view test5_07 as select sid, name, dname, ds_score, os_score
+from ( select distinct sid,name,dname from pub.student natural join pub.student_course where dname = '计算机科学与技术学院'
+and cid in (select cid from pub.course where name = '数据结构' or name = '操作系统'))
+natural left outer join
+(select distinct sid,max(score)ds_score from pub.student_course natural join pub.course
+		where name = '数据结构'
+		group by sid)
+natural left outer join
+		(select distinct sid, max(score) os_score
+		from pub.student_course natural join pub.course
+		where name = '操作系统'
+		group by sid)
+     
+
+create view test5_08 as
+	select sid, name, dname, ds_score, os_score
+	from 
+		(select distinct sid, name, dname
+		from pub.student
+		where dname = '计算机科学与技术学院') 
+	natural left outer join 
+		(select distinct sid, max(score) ds_score
+		from pub.student_course natural join pub.course
+		where name = '数据结构'
+		group by sid)
+	natural left outer join
+		(select distinct sid, max(score) os_score
+		from pub.student_course natural join pub.course
+		where name = '操作系统'
+		group by sid)
+
+create table temp (score number(3) default 0,count1 number(4) default 0,count0 number(5) default 0,percentage number(4,2) default 0);
+insert into temp (score,count1) select score,count(*)  from pub.student_course sc where sc.score>=60 group by score;
+update temp set count0=(select count(*) from pub.student_course sc where sc.score>=60);
+update temp set percentage=round(count1/count0*100,2);
+create view test5_09 as select * from temp;
+
+create or replace view test5_10 as select t1.cid,name cname,score,count1,count0,round(count1/count0*100,2)percentage from pub.course t1,(select cid,(to_char(trunc(score,-1),'fm00') ||'-'|| to_char(trunc(score,-1)+9,'fm00'))score,count(*)count1 from pub.student_course where score>=60 and score<=99 group by cid,to_char(trunc(score,-1),'fm00') ||'-'|| to_char(trunc(score,-1)+9,'fm00'))t2,(select cid,count(*)count0 from pub.student_course where score>=60 and score<=99 group by cid)t3 where t1.cid=t2.cid and t2.cid=t3.cid
+
+create view test6_01 as select sid,name,dname from pub.student where age<20 and dname = '物理学院' order by sid
+
+create or replace view test6_02 as
+select sid,name,sum(score) sum_score
+from pub.student natural left join pub.student_course
+where class=2009 and dname='软件学院'group by sid,name
+
+create or replace view test6_03 as
+select sid,name,score
+from pub.student natural  join pub.student_course
+where class=2010 and dname='计算机科学与技术学院' and cid='300005'
+
+create table test6_score as select *from pub.student_course where score>=60
+create table test6_sex as select *from pub.student where sex = '男'
+create or replace view test6_04 as
+select sid,name from test6_sex
+where sid in (select sid from test6_score where cid = '300005')
+Union
+(select sid,name from test6_sex
+where sid in (select sid from test6_score where cid = '300002'))
+minus
+(select sid,name from test6_sex
+where sid in (select sid from test6_score where cid = '300001'))
+
+create or replace view test6_05 as
+select a.sid,L.cid,L.name,score 
+from (select sid,cid,score from pub.student_course where sid in (select sid from pub.student where name = '李龙'))
+a join pub.course L on a.cid = L.cid
+
+create or replace view test6_06 as
+select sid,name from pub.student a
+where sid not in(select sid from pub.student,pub.course where (sid,cid) not in (select sid,cid from pub.student_course))
+
+create or replace view test6_07 as
+select sid,name from pub.student natural join pub.student_course
+where sid not in (select sid from pub.student,pub.course where (sid,cid) not in (select sid,cid from pub.student_course))and sid not in(select sid from pub.student_course where score<60)
+
+create view test6_08 as
+	select distinct sid, name
+	from pub.student S
+	where not exists
+		((select cid
+		from pub.course)
+	minus
+		(select cid
+		from pub.student_course T
+		where S.sid = T.sid))
+	and sid not in
+		(select sid
+		from 
+			(select distinct sid, cid, max(score) max_score
+			from pub.student_course
+			group by sid, cid)
+		where max_score < 60)
+
+
+create or replace view test6_09 as
+select a.sid,a.name,b.sum_credit
+from
+(select distinct sid,name from pub.student where class=2010 and dname = '化学与化工学院')a,
+(select distinct sid,sum(credit)sum_credit 
+from
+(select distinct sid,cid,max(score)max_score from pub.student_course group by sid,cid) natural join pub.course
+where max_score >= 60 group by sid)b
+where a.sid=b.sid
+
+create or replace view test6_10 as
+select cid,name from pub.course 
+where fcid in (select cid from pub.course where fcid is not null)
+
+create table test7_01 as select sid,name,birthday from pub.student
+select * from 
+(select sid,name,birthday,
+(select count(*) from test7_01 where substr(name,1,1)=substr(t1.name,1,1)) samefirstname 
+from pub.student_testindex t1)
+where samefirstname=7
+create index test7_01_firstname on test7_01 (substr(name,1,1))
+
+create table test7_02 as select sid,name,birthday from pub.student
+Update test7_02 set birthday=to_date('19881018','yyyymmdd') where substr(sid,12,1)='0'
+select * from
+(select sid,name,birthday,
+ (select count(*) from test7_02 where name=t1.name and birthday=t1.birthday) samenamebirthday,
+(select count(*) from test7_02 where birthday=t1.birthday) samebirthday
+ from pub.student_testindex t1)
+where samebirthday=403
+
+create or replace view test7_03 as
+select * from
+(select sid,name,birthday,
+(select count(*) from pub.student
+where substr(name,1,1)=substr(t1.name,1,1)
+) samefirstname 
+from pub.student_testindex t1) where samefirstname=7
+
+create view test7_04 as select * from 
+(select sid,name,birthday,
+(select count(*) from pub.student 
+where to_char(birthday,'yyyymm')=to_char(t1.birthday,'yyyymm')
+) sameyearmonth,
+(select count(*) from pub.student 
+where extract (year from birthday) =extract (year from t1.birthday)
+) sameyear
+ from pub.student_testindex t1) where sameyearmonth=35
+
+create view test7_05 as select * from 
+(select sid,name,birthday,
+(select count(*) from pub.student 
+where birthday-1=t1.birthday
+) nextbirthday
+from pub.student_testindex t1) where nextbirthday=7
+
+create table teat8_10(test varchar(20),age numeric (3))
+insert into teat8_10 (test,age) values('结果1',88)
+insert into teat8_10 (test,age) values('结果2',90)
+insert into teat8_10 (test,age) values('结果3',90)
+insert into teat8_10 (test,age) values('结果4',86)
+insert into teat8_10 (test,age) values('结果5',90)
+insert into teat8_10 (test,age) values('结果6',90)
+insert into teat8_10 (test,age) values('结果7',86)
+insert into teat8_10 (test,age) values('结果8',86)
+insert into teat8_10 (test,age) values('结果9',76)
+insert into teat8_10 (test,age) values('结果10',86)
+create table test8_10 as select*from teat8_10
+
+create table test9_01 as select *from pub.student_11_1 where 1=2
+create unique index test9_01_sid on test9_01(sid)
+insert into test9_01 select 8 from pub.student where sex='女'
+insert into test9_01 select * from pub.student_11_1
+where sex='女'  and sid  not in (select sid from test9_01)
+insert into test9_01 select * from pub.student_11_2
+where sex='女'  and sid  not in (select sid from test9_01)
+
+create table test9_02 like pub.student_11_1;
+create unique index test9_02_sid on test9_02(sid);
+insert into test9_02 select * from pub.student 
+where sex='女' and sid in
+(select sid from pub.student_course where score < 60);
+insert into test9_02 select * from pub.student_11_1 
+where sex='女' and sid in 
+(select sid from pub.student_course where score < 60) 
+and sid not in (select sid from test9_02);
+insert into test9_02 select * from pub.student_11_2
+where sex='女' and sid in 
+(select sid from pub.student_course where score < 60) 
+and sid not in (select sid from test9_02);

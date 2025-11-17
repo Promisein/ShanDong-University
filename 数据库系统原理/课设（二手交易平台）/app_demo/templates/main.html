@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主界面</title>
+
+</head>
+<body>
+
+<a href = "change_my_information/" target="_blank">
+<button>修改个人信息</button><br>
+</a>
+<a href = "my_information/" target="_blank">
+<button>我的消息</button><br>
+</a>
+<a href = "put_goods/" target="_blank">
+<button>我的商品</button><br>
+</a>
+<a href = "transaction/" target="_blank">
+<button>交易记录</button><br>
+</a>
+<a href = "/login/" target="_blank">
+<button>退出登录</button><br>
+</a>
+ <a href = "http://127.0.0.1:8000/main/" target="_blank">
+						<button type="submit" class="pay-btn">提交订单</button>
+                            </a>
+<div class="goods_detail_list fr">
+			{% for i in seller %}
+			{% for j in goods %}
+			{% if j.User_id == i.id %}
+			<h3>{{ j.Goods_name }}（卖家昵称：{{ i.name }}）
+                <a href="/user/shoper_information/{{ goods.gunit }}" style="font-size:18px;width:100px;height: 50px;background: #00bc6f;text-indent:10px">
+                    <img src="../../static/img/{{j.id}}.png" style="width:50px;height: 70px;overflow: hidden;object-fit: cover;" alt="">联系卖家
+                </a>
+            </h3>
+			<p>{{ j.gjianjie }}</p>
+			<div class="prize_bar">
+				<span class="show_prize">¥<em id="Price">{{ j.Peice }}</em></span>
+				<span class="show_unit">库  存：<span class="goods_kucun">{{ 1 }}</span></span>
+			</div>
+			<div class="goods_num clearfix">
+				<div class="num_name fl">数 量：</div>
+				<div class="num_add fl">
+					<input type="text" class="num_show fl" value="1">
+					<a href="javascript:plus();" class="add fr">+</a>
+					<a href="javascript:minus();" class="minus fr">-</a>
+				</div>
+			</div>
+			<div class="total">总价：<em id="gtotal">{{ j.Peice }}元</em></div>
+			<div class="operate_btn">
+                    <a href="javascript:;" class="buy_btn" id="buy_now">立即购买</a>
+                    <a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+			</div>
+		</div>
+{%endif%}
+			{%endfor%}
+			{%endfor%}
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+	<div class="design" id="cate5">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 模玩动漫</div>
+			</div>
+						<div class="design" id="cate6">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 美容彩妆</div>
+			</div>
+						<div class="design" id="cate7">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 数码</div>
+			</div>
+						<div class="design" id="cate8">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 服饰鞋帽</div>
+			</div>
+						<div class="design" id="cate9">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 运动户外</div>
+			</div>
+						<div class="design" id="cate10">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 母婴</div>
+			</div>
+						<div class="design" id="cate11">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 宠物花卉</div>
+			</div>
+            <div class="design" id="cate12">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 家用电器</div>
+			</div>
+            <div class="design" id="cate13">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 企业</div>
+			</div>
+            <div class="design" id="cate14">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 优惠券码</div>
+			</div>
+            <div class="design" id="cate15">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 家具</div>
+			</div>
+            <div class="design" id="cate16">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 手机</div>
+			</div>
+            <div class="design" id="cate17">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 包表首饰</div>
+			</div>
+            <div class="design" id="cate18">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 图书音像</div>
+			</div>
+            <div class="design" id="cate19">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 食品生鲜</div>
+			</div>
+            <div class="design" id="cate20">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 气摩生活</div>
+			</div>
+            <div class="design" id="cate21">
+				<div class="navto-nav"><i class="fa fa-external-link"></i> &nbsp; 文玩玉翠</div>
+			</div>
+					</div>
